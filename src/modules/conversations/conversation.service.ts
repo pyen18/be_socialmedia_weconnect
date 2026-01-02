@@ -88,15 +88,21 @@ export class ConversationsService {
       participants,
       group:
         type === 'group' && groupName
-          ? [{ name: groupName, createdBy: userId }]
+          ? [
+              {
+                name: groupName,
+                createdBy: new Types.ObjectId(userId),
+              },
+            ]
           : undefined,
+
       lastMessageAt: new Date(),
       seenBy: [],
       lastMessage: undefined,
       unreadCounts: {},
     });
 
-    await newConversation.populate(
+    await (newConversation as any).populate(
       'participants.userId',
       'username displayName avatarUrl',
     );
