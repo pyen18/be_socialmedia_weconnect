@@ -23,11 +23,26 @@ export class User {
   @Prop()
   avatarId?: string;
 
+  @Prop()
+  coverImageUrl?: string;
+
+  @Prop()
+  coverImageId?: string;
+
   @Prop({ maxlength: 500 })
   bio?: string;
 
   @Prop({ sparse: true })
   phone?: string;
+
+  @Prop({ maxlength: 100 })
+  location?: string;
+
+  @Prop({ maxlength: 100 })
+  website?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

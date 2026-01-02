@@ -34,8 +34,8 @@ async function bootstrap() {
 
   // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('Realtime Chat App API')
-    .setDescription('API Documentation for Realtime Chat App')
+    .setTitle('Social Media Weconnect App API')
+    .setDescription('API Documentation for Social Media Weconnect')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
