@@ -5,6 +5,7 @@ import configuration from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { FriendsModule } from './modules/friends/friends.module';
+import { PostsModule } from './modules/posts/posts.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { FriendsModule } from './modules/friends/friends.module';
     AuthModule,
     UsersModule,
     FriendsModule,
+    PostsModule,
   ],
 })
 export class AppModule {}

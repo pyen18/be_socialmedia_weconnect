@@ -1,4 +1,3 @@
-// src/modules/friends/friends.module.ts
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FriendsController } from './friends.controller';
@@ -20,5 +19,6 @@ import { User, UserSchema } from '../../schemas/user.schema';
   ],
   controllers: [FriendsController],
   providers: [FriendsService],
+  exports: [FriendsService],
 })
 export class FriendsModule {}
