@@ -1,20 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import cookieParser from 'cookie-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-
+import cookieParser from 'cookie-parser';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port');
 
-  // Global prefix
   app.setGlobalPrefix('api');
 
-  // Validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -23,16 +22,19 @@ async function bootstrap() {
     }),
   );
 
-  // Cookie parser
   app.use(cookieParser());
 
-  // CORS
   app.enableCors({
     origin: true,
     credentials: true,
   });
 
-  // Swagger setup
+  // ✅ OK
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
+
+  // Swagger
   const config = new DocumentBuilder()
     .setTitle('Social Media Weconnect App API')
     .setDescription('API Documentation for Social Media Weconnect')
@@ -46,6 +48,7 @@ async function bootstrap() {
   await app.listen(port || 5002);
   console.log(`🚀 Server đang chạy trên cổng ${port}`);
   console.log(`📘 Swagger Docs: http://localhost:${port}/api-docs`);
+  console.log(`📁 Upload directory: ${configService.get('upload.dir')}`);
 }
 
 bootstrap();

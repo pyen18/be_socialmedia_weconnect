@@ -110,23 +110,25 @@ export class CommentsService {
       });
     }
 
+    // Query filter - lấy cả comments có và không có parentCommentId
+    const filter: any = {
+      postId: new Types.ObjectId(postId),
+      isDeleted: false,
+    };
+
+    // Nếu muốn chỉ lấy top-level comments (không phải replies)
+    // Uncomment dòng này:
+    // filter.parentCommentId = { $exists: false };
+
     const [comments, total] = await Promise.all([
       this.commentModel
-        .find({
-          postId,
-          isDeleted: false,
-          parentCommentId: null, // Only top-level comments
-        })
+        .find(filter)
         .populate('authorId', 'username displayName avatarUrl')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      this.commentModel.countDocuments({
-        postId,
-        isDeleted: false,
-        parentCommentId: null,
-      }),
+      this.commentModel.countDocuments(filter),
     ]);
 
     const commentDtos = comments.map((comment) =>

@@ -1,13 +1,41 @@
+const required = (key: string): string => {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Missing environment variable: ${key}`);
+  }
+  return value;
+};
+
 export default () => ({
-  port: parseInt(process.env.PORT || '5002', 10) || 5002,
+  port: parseInt(process.env.PORT ?? '5002', 10),
+
   database: {
-    uri: process.env.MONGO_URI,
+    uri: required('MONGO_URI'),
   },
+
   jwt: {
-    accessSecret: process.env.ACCESS_TOKEN_SECRET,
-    accessTtl: process.env.ACCESS_TOKEN_TTL || '30m',
+    accessSecret: required('ACCESS_TOKEN_SECRET'),
+    accessTtl: process.env.ACCESS_TOKEN_TTL ?? '30m',
     refreshTtl:
-      parseInt(process.env.REFRESH_TOKEN_TTL || '1209600000', 10) ||
+      parseInt(process.env.REFRESH_TOKEN_TTL ?? '', 10) ||
       14 * 24 * 60 * 60 * 1000,
+  },
+
+  upload: {
+    dir: process.env.UPLOAD_DIR ?? './uploads',
+    maxFileSize:
+      parseInt(process.env.MAX_FILE_SIZE ?? '', 10) || 10 * 1024 * 1024,
+    allowedTypes: process.env.ALLOWED_FILE_TYPES?.split(',') ?? [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+    ],
+  },
+
+  cloudinary: {
+    cloudName: required('CLOUDINARY_CLOUD_NAME'),
+    apiKey: required('CLOUDINARY_API_KEY'),
+    apiSecret: required('CLOUDINARY_API_SECRET'),
   },
 });

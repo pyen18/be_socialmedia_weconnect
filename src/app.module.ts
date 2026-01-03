@@ -11,6 +11,7 @@ import { MessagesModule } from './modules/messages/messages.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ChatGatewayModule } from './gateways/chat-gateway.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ChatGatewayModule } from './gateways/chat-gateway.module';
     MessagesModule,
     CommentsModule,
     NotificationsModule,
+    UploadModule,
     ChatGatewayModule,
   ],
 })
