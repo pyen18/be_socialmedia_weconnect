@@ -113,11 +113,12 @@ export class ConversationsService {
   async getConversations(userId: string, query: GetConversationsQueryDto) {
     const { page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
+    const userObjectId = new Types.ObjectId(userId);
 
     const [conversations, total] = await Promise.all([
       this.conversationModel
         .find({
-          'participants.userId': userId,
+          'participants.userId': userObjectId,
         })
         .populate('participants.userId', 'username displayName avatarUrl')
         .populate('lastMessage.senderId', 'username displayName avatarUrl')
@@ -126,7 +127,7 @@ export class ConversationsService {
         .limit(limit)
         .lean(),
       this.conversationModel.countDocuments({
-        'participants.userId': userId,
+        'participants.userId': userObjectId,
       }),
     ]);
 
