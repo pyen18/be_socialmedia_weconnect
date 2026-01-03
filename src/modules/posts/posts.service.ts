@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Post, PostDocument } from '../../schemas/post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { GetPostsQueryDto } from './dto/get-posts-query.dto';
@@ -249,6 +249,72 @@ export class PostsService {
       visibility: post.visibility,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
+    };
+  }
+
+  async likePost(postId: string, userId: string) {
+    const post = await this.postModel.findOne({
+      _id: postId,
+      isDeleted: false,
+    });
+
+    if (!post) {
+      throw new NotFoundException({
+        code: 'POST_NOT_FOUND',
+        message: 'Không tìm thấy bài viết',
+      });
+    }
+
+    const userObjectId = new Types.ObjectId(userId);
+    const alreadyLiked = post.likedBy.some((id) => id.toString() === userId);
+
+    if (alreadyLiked) {
+      // Unlike
+      post.likedBy = post.likedBy.filter((id) => id.toString() !== userId);
+      post.likesCount = Math.max(0, post.likesCount - 1);
+    } else {
+      // Like
+      post.likedBy.push(userObjectId);
+      post.likesCount += 1;
+
+      // Send notification to post author (if not liking own post)
+      if (post.authorId.toString() !== userId) {
+        // Will implement notification service
+        // await this.notificationsService.createNotification(...)
+      }
+    }
+
+    await post.save();
+
+    return {
+      isLiked: !alreadyLiked,
+      likesCount: post.likesCount,
+    };
+  }
+
+  async getPostLikes(postId: string) {
+    const post = await this.postModel
+      .findOne({ _id: postId, isDeleted: false })
+      .populate('likedBy', 'username displayName avatarUrl')
+      .lean();
+
+    if (!post) {
+      throw new NotFoundException({
+        code: 'POST_NOT_FOUND',
+        message: 'Không tìm thấy bài viết',
+      });
+    }
+
+    const users = (post.likedBy as any[]).map((user) => ({
+      id: user._id.toString(),
+      username: user.username,
+      displayName: user.displayName,
+      avatarUrl: user.avatarUrl,
+    }));
+
+    return {
+      users,
+      total: users.length,
     };
   }
 }

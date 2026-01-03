@@ -131,4 +131,24 @@ export class PostsController {
   ) {
     return this.postsService.getPostImagesByAuthor(authorId);
   }
+
+  @Post(':id/like')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Like/Unlike post' })
+  @ApiParam({ name: 'id', description: 'Post ID' })
+  @ApiResponse({ status: 200, description: 'Thành công' })
+  async likePost(
+    @CurrentUser() user: UserDocument,
+    @Param('id', ParseMongoIdPipe) id: string,
+  ) {
+    return this.postsService.likePost(id, user._id.toString());
+  }
+
+  @Get(':id/likes')
+  @ApiOperation({ summary: 'Lấy danh sách users đã like post' })
+  @ApiParam({ name: 'id', description: 'Post ID' })
+  @ApiResponse({ status: 200, description: 'Thành công' })
+  async getPostLikes(@Param('id', ParseMongoIdPipe) id: string) {
+    return this.postsService.getPostLikes(id);
+  }
 }

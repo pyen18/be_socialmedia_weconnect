@@ -8,6 +8,9 @@ import { FriendsModule } from './modules/friends/friends.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { ConversationsModule } from './modules/conversations/conversations.module';
 import { MessagesModule } from './modules/messages/messages.module';
+import { CommentsModule } from './modules/comments/comments.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ChatGatewayModule } from './gateways/chat-gateway.module';
 
 @Module({
   imports: [
@@ -28,6 +31,9 @@ import { MessagesModule } from './modules/messages/messages.module';
     PostsModule,
     ConversationsModule,
     MessagesModule,
+    CommentsModule,
+    NotificationsModule,
+    ChatGatewayModule,
   ],
 })
 export class AppModule {}
