@@ -18,7 +18,7 @@ export class CreatePostDto {
   @ApiPropertyOptional({ type: [String], description: 'Danh sách URL ảnh' })
   @IsArray()
   @IsOptional()
-  @IsUrl({}, { each: true })
+  @IsUrl({ require_tld: false }, { each: true })
   images?: string[];
 
   @ApiPropertyOptional({
