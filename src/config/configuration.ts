@@ -10,7 +10,7 @@ export default () => ({
   port: parseInt(process.env.PORT ?? '5002', 10),
 
   database: {
-    uri: required('MONGO_URI'),
+    uri: required('MONGO_CONNECTIONSTRING'),
   },
 
   jwt: {
