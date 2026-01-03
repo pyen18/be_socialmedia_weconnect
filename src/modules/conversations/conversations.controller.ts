@@ -106,4 +106,31 @@ export class ConversationsController {
       user._id.toString(),
     );
   }
+
+  @Get('direct/:userId')
+  @ApiOperation({ summary: 'Lấy hoặc tạo conversation với user (shortcut)' })
+  @ApiParam({ name: 'userId', description: 'User ID để nhắn tin' })
+  @ApiResponse({
+    status: 200,
+    description: 'Thành công',
+    schema: {
+      example: {
+        conversation: {
+          id: 'conv_id',
+          type: 'direct',
+          participants: [],
+        },
+        isNew: false,
+      },
+    },
+  })
+  async getOrCreateDirectConversation(
+    @CurrentUser() user: UserDocument,
+    @Param('userId', ParseMongoIdPipe) userId: string,
+  ) {
+    return this.conversationsService.getOrCreateDirectConversation(
+      user._id.toString(),
+      userId,
+    );
+  }
 }

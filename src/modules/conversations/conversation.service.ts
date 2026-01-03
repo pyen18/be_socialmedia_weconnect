@@ -246,4 +246,74 @@ export class ConversationsService {
       updatedAt: conversation.updatedAt,
     };
   }
+  async getOrCreateDirectConversation(userId: string, targetUserId: string) {
+    // Cannot message yourself
+    if (userId === targetUserId) {
+      throw new BadRequestException({
+        code: 'CANNOT_MESSAGE_YOURSELF',
+        message: 'Không thể nhắn tin với chính mình',
+      });
+    }
+
+    // Check if target user exists
+    const targetUser = await this.userModel.exists({ _id: targetUserId });
+    if (!targetUser) {
+      throw new NotFoundException({
+        code: 'USER_NOT_FOUND',
+        message: 'Người dùng không tồn tại',
+      });
+    }
+
+    // Check if they are friends
+    let userA = userId;
+    let userB = targetUserId;
+    if (userA > userB) [userA, userB] = [userB, userA];
+
+    const areFriends = await this.friendModel.exists({ userA, userB });
+    if (!areFriends) {
+      throw new ForbiddenException({
+        code: 'NOT_FRIENDS',
+        message: 'Bạn chỉ có thể nhắn tin với bạn bè',
+      });
+    }
+
+    // Find existing conversation
+    const existingConversation = await this.conversationModel
+      .findOne({
+        type: 'direct',
+        'participants.userId': { $all: [userId, targetUserId] },
+      })
+      .populate('participants.userId', 'username displayName avatarUrl')
+      .populate('lastMessage.senderId', 'username displayName avatarUrl')
+      .lean();
+
+    if (existingConversation) {
+      return {
+        conversation: this.mapToConversationDto(existingConversation, userId),
+        isNew: false,
+      };
+    }
+
+    // Create new conversation
+    const newConversation = await this.conversationModel.create({
+      type: 'direct',
+      participants: [
+        { userId: new Types.ObjectId(userId), joinedAt: new Date() },
+        { userId: new Types.ObjectId(targetUserId), joinedAt: new Date() },
+      ],
+      lastMessageAt: new Date(),
+      seenBy: [],
+      unreadCounts: {},
+    });
+
+    await newConversation.populate(
+      'participants.userId',
+      'username displayName avatarUrl',
+    );
+
+    return {
+      conversation: this.mapToConversationDto(newConversation, userId),
+      isNew: true,
+    };
+  }
 }
