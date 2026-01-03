@@ -125,7 +125,10 @@ export class MessagesService {
     }
 
     // Build query
-    const queryFilter: any = { conversationId };
+    // 👇 FIX: Ép kiểu String sang ObjectId ở đây
+    const queryFilter: any = {
+      conversationId: new Types.ObjectId(conversationId),
+    };
 
     if (before) {
       const beforeMessage = await this.messageModel.findById(before);
@@ -144,7 +147,7 @@ export class MessagesService {
         .skip(skip)
         .limit(limit)
         .lean(),
-      this.messageModel.countDocuments({ conversationId }),
+      this.messageModel.countDocuments(queryFilter), // 👈 Sửa luôn chỗ này dùng queryFilter cho chuẩn
     ]);
 
     const messageDtos = messages.map((msg) => this.mapToMessageDto(msg));
