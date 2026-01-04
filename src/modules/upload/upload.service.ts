@@ -9,7 +9,6 @@ export class UploadService {
   private uploadDir: string;
   private maxFileSize: number;
   private allowedTypes: string[];
-
   constructor(private configService: ConfigService) {
     this.uploadDir = this.configService.get<string>('upload.dir', './uploads');
 
@@ -102,7 +101,10 @@ export class UploadService {
   }
 
   private getBaseUrl(): string {
-    const port = this.configService.get<number>('port');
-    return `http://localhost:${port}`;
+    // Get BASE_URL from config (set via environment variable)
+    const baseUrl = this.configService.get<string>('baseUrl');
+    return (
+      baseUrl || `http://localhost:${this.configService.get<number>('port')}`
+    );
   }
 }
