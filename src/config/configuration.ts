@@ -8,6 +8,7 @@ const required = (key: string): string => {
 
 export default () => ({
   port: parseInt(process.env.PORT ?? '5002', 10),
+  baseUrl: process.env.baseUrl || 'http://localhost:5002',
 
   database: {
     uri: required('MONGO_URI'),
