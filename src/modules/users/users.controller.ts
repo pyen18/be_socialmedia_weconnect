@@ -51,6 +51,37 @@ export class UsersController {
     return this.usersService.getMe(user._id.toString());
   }
 
+  // 👇 ĐÃ CHUYỂN LÊN ĐÂY (TRƯỚC :id) ĐỂ TRÁNH XUNG ĐỘT ROUTE
+  @Get('search')
+  @ApiOperation({ summary: 'Tìm kiếm users' })
+  @ApiQuery({ name: 'q', required: false, description: 'Search query' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Thành công' })
+  async searchUsers(
+    @CurrentUser() user: UserDocument,
+    @Query('q') query?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    if (!query || query.trim().length === 0) {
+      return {
+        users: [],
+        total: 0,
+        page: 1,
+        totalPages: 0,
+      };
+    }
+
+    return this.usersService.searchUsers(
+      user._id.toString(),
+      query.trim(),
+      page,
+      limit,
+    );
+  }
+
+  // 👇 ROUTE NÀY PHẢI NẰM DƯỚI CÁC ROUTE CỤ THỂ KHÁC
   @Get(':id')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết user (public profile)' })
   @ApiParam({ name: 'id', description: 'User ID' })
@@ -117,34 +148,5 @@ export class UsersController {
     @Param('userId', ParseMongoIdPipe) userId: string,
   ) {
     return this.usersService.getUserFriends(userId, user._id.toString());
-  }
-
-  @Get('search')
-  @ApiOperation({ summary: 'Tìm kiếm users' })
-  @ApiQuery({ name: 'q', required: false, description: 'Search query' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiResponse({ status: 200, description: 'Thành công' })
-  async searchUsers(
-    @CurrentUser() user: UserDocument,
-    @Query('q') query?: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ) {
-    if (!query || query.trim().length === 0) {
-      return {
-        users: [],
-        total: 0,
-        page: 1,
-        totalPages: 0,
-      };
-    }
-
-    return this.usersService.searchUsers(
-      user._id.toString(),
-      query.trim(),
-      page,
-      limit,
-    );
   }
 }
