@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
-import * as streamifier from 'streamifier';
+import { Readable } from 'stream';
 
 @Injectable()
 export class CloudinaryService {
@@ -57,7 +57,8 @@ export class CloudinaryService {
         },
       );
 
-      streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      // Create readable stream from buffer (no need for streamifier)
+      Readable.from(file.buffer).pipe(uploadStream);
     });
   }
 

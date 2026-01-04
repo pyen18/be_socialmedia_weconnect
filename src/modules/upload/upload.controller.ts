@@ -25,7 +25,6 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { UserDocument } from '../../schemas/user.schema';
 import { UploadService } from './upload.service';
 import { CloudinaryService } from './cloudinary.service';
-import { randomUUID } from 'crypto';
 
 @ApiTags('Upload')
 @Controller('upload')

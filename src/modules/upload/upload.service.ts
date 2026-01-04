@@ -1,16 +1,8 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-
-export interface UploadedFileResult {
-  url: string;
-  filename: string;
-  originalName: string;
-  mimeType: string;
-  size: number;
-}
 
 @Injectable()
 export class UploadService {
@@ -45,9 +37,9 @@ export class UploadService {
     // Validate file
     this.validateFile(file);
 
-    // Generate unique filename
+    // Generate unique filename using crypto.randomUUID()
     const fileExt = path.extname(file.originalname);
-    const fileName = `${userId}_${uuidv4()}${fileExt}`;
+    const fileName = `${userId}_${randomUUID()}${fileExt}`;
     const filePath = path.join(this.uploadDir, fileName);
 
     // Save file
@@ -65,11 +57,14 @@ export class UploadService {
     };
   }
 
-  async uploadMultiple(
-    files: Express.Multer.File[],
-    userId: string,
-  ): Promise<UploadedFileResult[]> {
-    const uploadedFiles: UploadedFileResult[] = [];
+  async uploadMultiple(files: Express.Multer.File[], userId: string) {
+    const uploadedFiles: Array<{
+      url: string;
+      filename: string;
+      originalName: string;
+      mimeType: string;
+      size: number;
+    }> = [];
 
     for (const file of files) {
       const result = await this.uploadSingle(file, userId);
@@ -78,6 +73,7 @@ export class UploadService {
 
     return uploadedFiles;
   }
+
   async deleteFile(filename: string) {
     const filePath = path.join(this.uploadDir, filename);
 
