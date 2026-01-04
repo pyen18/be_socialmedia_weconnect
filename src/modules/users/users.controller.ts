@@ -9,6 +9,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,6 +17,7 @@ import {
   ApiBearerAuth,
   ApiResponse,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -115,5 +117,34 @@ export class UsersController {
     @Param('userId', ParseMongoIdPipe) userId: string,
   ) {
     return this.usersService.getUserFriends(userId, user._id.toString());
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Tìm kiếm users' })
+  @ApiQuery({ name: 'q', required: false, description: 'Search query' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Thành công' })
+  async searchUsers(
+    @CurrentUser() user: UserDocument,
+    @Query('q') query?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    if (!query || query.trim().length === 0) {
+      return {
+        users: [],
+        total: 0,
+        page: 1,
+        totalPages: 0,
+      };
+    }
+
+    return this.usersService.searchUsers(
+      user._id.toString(),
+      query.trim(),
+      page,
+      limit,
+    );
   }
 }

@@ -238,4 +238,49 @@ export class UsersService {
       total: friendList.length,
     };
   }
+
+  // Search users
+  async searchUsers(
+    currentUserId: string,
+    query: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
+    const skip = (page - 1) * limit;
+
+    const searchQuery = {
+      $or: [
+        { username: { $regex: query, $options: 'i' } },
+        { displayName: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } },
+      ],
+      _id: { $ne: currentUserId }, // Exclude current user
+    };
+
+    const users = await this.userModel
+      .find(searchQuery)
+      .select('-hashedPassword')
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const total = await this.userModel.countDocuments(searchQuery);
+
+    const totalPages = Math.ceil(total / limit);
+
+    const formattedUsers = users.map((user: any) => ({
+      id: user._id.toString(),
+      username: user.username,
+      displayName: user.displayName,
+      avatarUrl: user.avatarUrl,
+      bio: user.bio,
+    }));
+
+    return {
+      users: formattedUsers,
+      total,
+      page,
+      totalPages,
+    };
+  }
 }
