@@ -73,7 +73,7 @@ export class UploadController {
       throw new BadRequestException('No file provided');
     }
 
-    return this.uploadService.uploadSingle(file, user._id.toString());
+    return this.cloudinaryService.uploadImage(file, `users/${user._id}`);
   }
 
   @Post('images')
