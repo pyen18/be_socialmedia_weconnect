@@ -73,7 +73,17 @@ export class UploadController {
       throw new BadRequestException('No file provided');
     }
 
-    return this.cloudinaryService.uploadImage(file, `users/${user._id}`);
+    const ressult = await this.cloudinaryService.uploadImage(
+      file,
+      `users/${user._id}`,
+    );
+    return {
+      url: ressult.url,
+      filename: ressult.publicId,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      size: ressult.size,
+    };
   }
 
   @Post('images')
@@ -125,7 +135,31 @@ export class UploadController {
       throw new BadRequestException('No files provided');
     }
 
-    return this.uploadService.uploadMultiple(files, user._id.toString());
+    const uploadedFiles: Array<{
+      url: string;
+      filename: string;
+      originalName: string;
+      mimeType: string;
+      size: number;
+    }> = [];
+
+    // Duyệt qua từng file, upload và map dữ liệu
+    for (const file of files) {
+      const result = await this.cloudinaryService.uploadImage(
+        file,
+        `users/${user._id}`,
+      );
+
+      uploadedFiles.push({
+        url: result.url,
+        filename: result.publicId,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: result.size,
+      });
+    }
+
+    return uploadedFiles;
   }
 
   @Post('cloudinary/image')
