@@ -146,20 +146,31 @@ export class UsersService {
     const { photoUrl, type, photoId } = dto;
 
     const user = await this.userModel.findById(userId);
-
     if (!user) {
-      throw new NotFoundException({
-        code: 'USER_NOT_FOUND',
-        message: 'Người dùng không tồn tại',
-      });
+      throw new NotFoundException('Người dùng không tồn tại');
     }
 
+    // --- FIX BUG 1: XÓA ẢNH CŨ ---
     if (type === 'avatar') {
+      // Nếu user đã có avatarId cũ và nó KHÁC với cái mới (đề phòng re-upload)
+      if (user.avatarId && user.avatarId !== photoId) {
+        // Gọi service xóa ảnh cũ trên cloud (Fire and forget hoặc await tùy logic)
+        await this.storageService.deleteImage(user.avatarId);
+      }
+
       user.avatarUrl = photoUrl;
       if (photoId) user.avatarId = photoId;
     } else if (type === 'cover') {
+      // Tương tự cho cover
+      if (user.coverImageId && user.coverImageId !== photoId) {
+        await this.storageService.deleteImage(user.coverImageId);
+      }
+
       user.coverImageUrl = photoUrl;
       if (photoId) user.coverImageId = photoId;
+    } else {
+      // --- FIX BUG 2: CHẶN TYPE SAI ---
+      throw new BadRequestException('Type phải là avatar hoặc cover');
     }
 
     await user.save();
